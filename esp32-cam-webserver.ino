@@ -1,55 +1,22 @@
 #include "esp_camera.h"
 #include <WiFi.h>
 
-/* This sketch is a extension/expansion/reork of the 'official' ESP32 Camera example
- *  sketch from Expressif:
- *  https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/Camera/CameraWebServer
- *  
- *  It is modified to allow control of Illumination LED Lamps's (present on some modules),
- *  greater feedback via a status LED, and the HTML contents are present in plain text
- *  for easy modification. 
- *  
- *  A camera name can now be configured, and wifi details can be stored in an optional 
- *  header file to allow easier updated of the repo.
- *  
- *  The web UI has had minor changes to add the lamp control when present, I have made the 
- *  'Start Stream' controls more accessible, and add feedback of the camera name/firmware.
- *  
- *  
- * note: Make sure that you have either selected ESP32 AI Thinker,
- *       or another board which has PSRAM enabled to use high resolution camera modes
-*/
+//ESP32 Dev Module
+//PSRAM: disabled
+//Partition scheme: Huge APP
 
-// Select camera board model
-//#define CAMERA_MODEL_WROVER_KIT
-//#define CAMERA_MODEL_ESP_EYE
-//#define CAMERA_MODEL_M5STACK_PSRAM
-//#define CAMERA_MODEL_M5STACK_WIDE
 #define CAMERA_MODEL_M5STACK_NO_PSRAM
-//#define CAMERA_MODEL_AI_THINKER
 
 // Select camera module used on the board
 #define CAMERA_MODULE_OV2640
 //#define CAMERA_MODULE_OV3660
 
-#if __has_include("myconfig.h")
-  // I keep my settings in a seperate header file
-  #include "myconfig.h"
-#else
-  const char* ssid = "my-access-point-ssid";
-  const char* password = "my-access-point-password";
-#endif
+#include "myconfig.h"
 
-// A Name for the Camera. (can be set in myconfig.h)
-#ifdef CAM_NAME
-  char myName[] = CAM_NAME;
-#else
-  char myName[] = "ESP32 camera server";
-#endif
+char myName[] = CAM_NAME;
 
 // This will be displayed to identify the firmware
 char myVer[] PROGMEM = __DATE__ " @ " __TIME__;
-
 
 #include "camera_pins.h"
 
@@ -145,6 +112,7 @@ void setup() {
   }
   //drop down frame size for higher initial frame rate
   s->set_framesize(s, FRAMESIZE_SVGA);
+  s->set_vflip(s, 1);
 
 #if defined(CAMERA_MODEL_M5STACK_WIDE)
   s->set_vflip(s, 1);
@@ -181,6 +149,7 @@ void setup() {
   Serial.print("Camera Ready!  Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
+  flashLED(400);
 }
 
 // Notification LED 
@@ -200,5 +169,6 @@ void loop() {
   // Just loop forever.
   // The stream and URI handler processes initiated by the startCameraServer() call at the
   // end of setup() will handle the camera and UI processing from now on.
+  flashLED(400);
   delay(10000);
 }
